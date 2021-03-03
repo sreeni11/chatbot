@@ -1,0 +1,74 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+	    <title>Signup</title>
+	    <script src = "https://code.jquery.com/jquery-3.5.0.min.js"></script>
+	    <meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+	    <script type = "text/javascript">
+	        function checkForm()
+	        {
+    	        var msg = "";
+    	        var flag = true;
+    	        var tmp = $('#phone').val();
+    	        $.ajax({url:'https://sreeni11.pythonanywhere.com/checkph',type:'POST',data:{ph:tmp}, success:function(data,status)
+    	        {
+    	            if(data == 'Y')
+    	            {
+    	                msg += "Phone already registered please login to your account\n";
+    	                flag = false;
+    	            }
+    	            else if(status == '503')
+    	            {
+    	                msg += "There was an error signing up try again\n"
+    	            }
+    	        }});
+    	        if(len(tmp) != 10)
+    	        {
+    	            msg += "Invalid mobile number\n";
+    	            flag = false;
+    	        }
+	            tmp = $('#gender').val();
+    	        if(tmp != 'M' || tmp != 'F')
+    	        {
+    	            msg += "Invalid gender";
+    	            flag = false;
+    	        }
+    	        if(flag == false)
+    	        {
+    	            window.alert(msg);
+    	            $('signup').trigger('reset');
+    	        }
+	            return flag;
+	        }
+	    </script>
+	</head>
+	<body>
+	    <h1>Signup</h1>
+	    <form method='POST' onSubmit='checkForm()' id='signup'>
+    		<div>
+    			<label>Mobile number</label>
+    			<input type='text' id='phone' name='phone' placeholder='Mobile number'>
+    		</div>
+    		<div>
+    			<label>Password</label>
+    			<input type='password' id='password' name='password' placeholder='Password'>
+    		</div>
+    		<div>
+    			<label>First Name</label>
+    			<input type='text' id = 'fname' name='fname' placeholder='First Name'>
+    		</div>
+    		<div>
+    			<label>Last Name</label>
+    			<input type='text' id = 'lname' name='lname' placeholder='Last Name'>
+    		</div>
+    		<div>
+    			<label>Gender (M/F) </label>
+    			<input type='text' id = 'gender' name='gender' placeholder='Gender'>
+    		</div>
+    		<div>
+			    <button type='submit'>Signup</button>
+		    </div>
+		</form>
+	</body>
+</html>

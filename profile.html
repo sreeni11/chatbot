@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile</title>
+    <script src = "https://code.jquery.com/jquery-3.5.0.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type = 'text/css'>
+        table {
+            border: 1px solid black;
+            padding: 2px;
+            text-align: center;
+        }
+        tr {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <script type = 'text/javascript'>
+        $(window).on("onbeforeunload",function(){
+            if ((window.event.clientX < 0) || (window.event.clientY < 0))
+            {
+                s = $('#usrph').text();
+                window.alert(s);
+                $.ajax({url:'https://sreeni11.pythonanywhere.com/logout',type:'POST',data:{ph:s}, success:function(data,status)
+                {
+                    console.log('Data:' + data + 'Status:' + status);
+                }});
+            }
+        });
+
+        $(document).ready(function(){
+            var adm = $('#admin').text();
+            if(adm == 'Y')
+            {
+                $('#usrs').removeAttr('hidden');
+            }
+            else
+            {
+                var ph = $('#usrphn').text();
+                view_act('i' + ph);
+                $('#gcont').removeAttr('hidden');
+            }
+        });
+
+        function logout()
+        {
+            s = $('#usrphn').text();
+            console.log(s);
+            $.ajax({url:'https://sreeni11.pythonanywhere.com/logout',type:'POST',data:{ph:s}, success:function(data,status)
+            {
+                console.log('Data:' + data + 'Status:' + status);
+                if(data['status'] == 200)
+                {
+                    $(location).attr('href','https://sreeni11.pythonanywhere.com/login');
+                }
+                else
+                {
+                    window.alert("Failed to logout try again");
+                }
+            }});
+        }
+
+        function dis(id)
+        {
+            s = String(id)
+            $.ajax({url:'https://sreeni11.pythonanywhere.com/dis',type:'POST',data:{ph:s}, success:function(data,status)
+            {
+                window.alert('Data:' + data + '\nStatus:' + status);
+                setTimeout(() => {location.reload(true)}, 2000);
+            }});
+            //window.alert(id);
+        }
+
+        function promote(id)
+        {
+            $.post('https://sreeni11.pythonanywhere.com/promote',{ph:String(id)}, function(data,status)
+            {
+                window.alert('Data:' + data + '\nStatus:' + status);
+                setTimeout(() => {location.reload(true)}, 2000);
+            });
+            //window.alert(id);
+        }
+
+        function view(id)
+        {
+            var phn = $('#uap').text();
+            //console.log(phn);
+            $.post('https://sreeni11.pythonanywhere.com/viewquest',{ph:String(phn),ts:String(id)}, function(data,status)
+            {
+                //resp = JSON.parse(data);
+                resp = data;
+                console.log(resp);
+                $('#ha').attr('hidden','true');
+                $('#med').attr('hidden','true');
+                $('#updc').attr('hidden','true');
+                $('#qbdy').html('');
+                if(resp.length > 0)
+                {
+                    $('#qp').text(resp[0][0] + " " + resp[0][1]);
+                    for(var i = 0; i < resp.length; ++i)
+                    {
+                        //console.log('i' + resp[i][1]);
+                        var tr = $("<tr></tr>");
+                        var td1 = $("<td></td>").text(resp[i][2]);
+                        var td2 = $("<td></td>").text(resp[i][3]);
+                        tr.append(td1,td2);
+                        $('#qbdy').append(tr);
+                    }
+                }
+                $('#quest').removeAttr('hidden');
+            });
+        }
+
+        function updateact(id)
+        {
+            var phn = $('#uap').text();
+            //console.log(phn);
+            var req = {ph:String(phn),ts:String(id)};
+            //$.post('https://sreeni11.pythonanywhere.com/view',{ph:String(phn),ts:String(id)}, function(data,status)
+            $.post('https://sreeni11.pythonanywhere.com/view',req, function(data,status)
+            {
+                //resp = JSON.parse(data);
+                resp = data;
+                console.log(resp);
+                //$('#useract').attr('hidden','true');
+                $('#quest').attr('hidden','true');
+                $('#updc').removeAttr('hidden');
+                if(resp[1].length > 0)
+                {
+                    $('#hname').val(resp[0][2]);
+                    $('#timestamp').val(resp[0][3]);
+                    $('#wakeup').val(resp[0][4]);
+                    $('#severity').val(resp[0][5]);
+                    $('#duration').val(resp[0][6]);
+                    $('#count').val(resp[0][7]);
+                    $('#tmed').val(resp[0][8]);
+                    if(resp[0][9] != null)
+                    {
+                        $('#mcycle').val(resp[0][9]);
+                        $('#mcycle').removeAttr('disabled');
+                    }
+                    else
+                    {
+                        $('#mcycle').val('NULL');
+                        $('#mcycle').attr('disabled','true');
+                    }
+                    if(resp[0][10] != null)
+                    {
+                        $('#phy').val(resp[0][10]);
+                    }
+                    else
+                    {
+                        $('#phy').val('NULL');
+                    }
+                    //$('#usc').val(resp[0][11]);
+                    if(resp[0][11] != null)
+                    {
+                        $('#usc').val(resp[0][11]);
+                    }
+                    else
+                    {
+                        $('#usc').val('NULL');
+                    }
+                    $('#mname').val(resp[1][0][2]);
+                    $('#ts').val(resp[1][0][3]);
+                    $('#pills').val(resp[1][0][4]);
+                    $('#mhelp').val(resp[1][0][5]);
+                    $('#ha').removeAttr('hidden');
+                    $('#tsc').attr('hidden','true');
+                    $('#med').removeAttr('hidden');
+                }
+                else if(resp[0].length < 5)
+                {
+                    $('#mname').val(resp[0][2]);
+                    $('#ts').val(resp[0][3]);
+                    $('#pills').val(resp[0][4]);
+                    $('#mhelp').val(resp[0][5]);
+                    $('#ha').attr('hidden','true');
+                    $('#med').removeAttr('hidden');
+                    $('#tsc').removeAttr('hidden');
+                }
+                else
+                {
+                    $('#hname').val(resp[0][2]);
+                    $('#timestamp').val(resp[0][3]);
+                    $('#wakeup').val(resp[0][4]);
+                    $('#severity').val(resp[0][5]);
+                    $('#duration').val(resp[0][6]);
+                    $('#count').val(resp[0][7]);
+                    $('#tmed').val(resp[0][8]);
+                    if(resp[0][9] != null)
+                    {
+                        $('#mcycle').val(resp[0][9]);
+                        $('#mcycle').removeAttr('disabled');
+                    }
+                    else
+                    {
+                        $('#mcycle').val('NULL');
+                        $('#mcycle').attr('disabled','true');
+                    }
+                    if(resp[0][10] != null)
+                    {
+                        $('#phy').val(resp[0][10]);
+                    }
+                    else
+                    {
+                        $('#phy').val('NULL');
+                    }
+                    $('#usc').val(resp[0][11]);
+                    if(resp[0][11] != null)
+                    {
+                        $('#usc').val(resp[0][11]);
+                    }
+                    else
+                    {
+                        $('#usc').val('NULL');
+                    }
+                    $('#med').attr('hidden','true');
+                    $('#ha').removeAttr('hidden');
+                }
+            });
+        }
+
+        function upd()
+        {
+            var flag = true;
+            var msg = "";
+            var ph = $('#usrphn').text();
+            var t1 = $('#timestamp').val();
+            var t2 = $('#ts').val();
+            var val = 0;
+            var ts = '';
+            var req = {};
+            if(t1.length > 1 && t2.length < 2)
+            {
+                val = 1;
+            }
+            else if(t1.length < 2 && t2.length > 1)
+            {
+                val = 2;
+            }
+            if(val == 1)
+            {
+                var hname = $('#hname').val();
+                ts = $('#timestamp').val();
+                var wakeup = $('#wakeup').val();
+                var severity = $('#severity').val();
+                var duration = $('#duration').val();
+                var count = $('#count').val();
+                var tmed = $('#tmed').val();
+                var mcycle = $('#mcycle').val();
+                var phy = $('#phy').val();
+                var usc = $('#usc').val();
+                if(!Number.isInteger(severity) && parseInt(severity) > 10 && parseInt(severity) < 0)
+                {
+                    msg += "Severity value is invalid\n";
+                    flag = false;
+                }
+                else
+                {
+                    severity = parseInt(severity);
+                }
+                if(!Number.isInteger(duration) && parseInt(count) < 0)
+                {
+                    msg += "Duration value is invalid\n";
+                    flag = false;
+                }
+                else
+                {
+                    duration = parseInt(duration);
+                }
+                if(!Number.isInteger(count) && parseInt(count) < 0)
+                {
+                    msg += "Count value is invalid\n";
+                    flag = false;
+                }
+                else
+                {
+                    count = parseInt(count);
+                }
+                if((phy == 'NULL' && usc != 'NULL') || (phy == 'N' && usc == 'Y') || (phy == 'Y' && usc == 'NULL') )
+                {
+                    msg += "Invalid values for physician and usc values";
+                    flag = false;
+                }
+                if(!flag)
+                {
+                    window.alert(msg);
+                    return null;
+                }
+                //req = {'ph':ph,'hname':hname,'ts':ts,'wakeup':wakeup,'severity':severity,'duration':duration,'count':count,'tmed':tmed,'mcycle':mcycle,'phy':phy,'usc':usc};
+                req = {ph:String(ph),hname:String(hname),ts:String(ts),wakeup:String(wakeup),severity:String(severity),duration:String(duration),count:String(count),tmed:String(tmed),mcycle:String(mcycle),phy:String(phy),usc:String(usc)};
+
+                /*$.post('https://sreeni11.pythonanywhere.com/update',{ph:String(ph),hname:String(hname),ts:String(ts),wakeup:String(wakeup),severity:String(severity),duration:String(duration),count:String(count),tmed:String(tmed),mcycle:String(mcycle),phy:String(phy),usc:String(usc)}, function(data,status)
+                {
+                    console.log('Data:' + String(data) + ' status:' + String(status));
+                    if(data['status'] == 200)
+                    {
+                        window.alert('Updated successfully');
+                        view_act('a' + ph);
+                        updateact('a' + ts);
+                    }
+                    else
+                    {
+                        window.alert('An error occured');
+                    }
+                });
+                $.ajax({url:'https://sreeni11.pythonanywhere.com/update',type:'POST',data:{ph:String(ph),hname:String(hname),ts:String(ts),wakeup:String(wakeup),severity:String(severity),duration:String(duration),count:String(count),tmed:String(tmed),mcycle:String(mcycle),phy:String(phy),usc:String(usc)}, success:function(data,status)
+                {
+                    console.log('Data:' + String(data) + ' status:' + String(status));
+                    if(data['status'] == 200)
+                    {
+                        window.alert('Updated successfully');
+                        view_act('a' + ph);
+                        updateact('a' + ts);
+                    }
+                    else
+                    {
+                        window.alert('An error occured');
+                    }
+                }});*/
+            }
+            else if(val == 2)
+            {
+                var mname = $('#mname').val();
+                ts = $('#ts').val();
+                var pills = $('#pills').val();
+                var mhelp = $('#mhelp').val();
+                if(!Number.isInteger(pills) && parseInt(pills) < 0)
+                {
+                    msg += "Number of pills value is invalid\n";
+                    flag = false;
+                }
+                else
+                {
+                    count = parseInt(pills);
+                }
+                if(!flag)
+                {
+                    window.alert(msg);
+                    return null;
+                }
+                //req = {'ph':ph,'mname':mname,'ts':ts,'pills':pills,'mhelp':mhelp};
+                req = {ph:String(ph),mname:String(mname),ts:String(ts),pills:String(pills),mhelp:String(mhelp)};
+                /*$.post('https://sreeni11.pythonanywhere.com/update',{ph:String(ph),mname:String(mname),ts:String(ts),pills:String(pills),mhelp:String(mhelp)}, function(data,status)
+                {
+                    console.log('Data:' + String(data) + ' status:' + String(status));
+                    if(data['status'] == 200)
+                    {
+                        window.alert('Updated successfully');
+                        view_act('a' + ph);
+                        updateact('a' + ts);
+                    }
+                    else
+                    {
+                        window.alert('An error occured');
+                    }
+                });
+                $.ajax({url:'https://sreeni11.pythonanywhere.com/update',type:'POST',data:{ph:String(ph),mname:String(mname),ts:String(ts),pills:String(pills),mhelp:String(mhelp)}, success:function(data,status)
+                {
+                    console.log('Data:' + String(data) + ' status:' + String(status));
+                    if(data['status'] == 200)
+                    {
+                        window.alert('Updated successfully');
+                        view_act('a' + ph);
+                        updateact('a' + ts);
+                    }
+                    else
+                    {
+                        window.alert('An error occured');
+                    }
+                }});*/
+            }
+            else
+            {
+                var hname = $('#hname').val();
+                ts = $('#timestamp').val();
+                var wakeup = $('#wakeup').val();
+                var severity = $('#severity').val();
+                var duration = $('#duration').val();
+                var count = $('#count').val();
+                var tmed = $('#tmed').val();
+                var mcycle = $('#mcycle').val();
+                var phy = $('#phy').val();
+                var usc = $('#usc').val();
+                var mname = $('#mname').val();
+                var pills = $('#pills').val();
+                var mhelp = $('#mhelp').val();
+                if(!Number.isInteger(pills) && parseInt(pills) < 0)
+                {
+                    msg += "Number of pills value is invalid\n";
+                    flag = false;
+                }
+                else
+                {
+                    count = parseInt(pills);
+                }
+                if(!Number.isInteger(severity) && parseInt(severity) > 10 && parseInt(severity) < 0)
+                {
+                    msg += "Severity value is invalid\n";
+                    flag = false;
+                }
+                else
+                {
+                    severity = parseInt(severity);
+                }
+                if(!Number.isInteger(duration) && parseInt(count) < 0)
+                {
+                    msg += "Duration value is invalid\n";
+                    flag = false;
+                }
+                else
+                {
+                    duration = parseInt(duration);
+                }
+                if(!Number.isInteger(count) && parseInt(count) < 0)
+                {
+                    msg += "Count value is invalid\n";
+                    flag = false;
+                }
+                else
+                {
+                    count = parseInt(count);
+                }
+                if(!flag)
+                {
+                    window.alert(msg);
+                    return null;
+                }
+                //req = {'ph':ph,'hname':hname,'ts':ts,'wakeup':wakeup,'severity':severity,'duration':duration,'count':count,'tmed':tmed,'mcycle':mcycle,'phy':phy,'usc':usc,'mname':mname,'pills':pills,'mhelp':mhelp};
+                req = {ph:String(ph),hname:String(hname),ts:String(ts),wakeup:String(wakeup),severity:String(severity),duration:String(duration),count:String(count),tmed:String(tmed),mcycle:String(mcycle),
+                phy:String(phy),usc:String(usc),mname:String(mname),pills:String(pills),mhelp:String(mhelp)};
+                /*$.post('https://sreeni11.pythonanywhere.com/update',{ph:String(ph),hname:String(hname),ts:String(ts),wakeup:String(wakeup),severity:String(severity),duration:String(duration),count:String(count),tmed:String(tmed),mcycle:String(mcycle),phy:String(phy),usc:String(usc),mname:String(mname),pills:String(pills),mhelp:String(mhelp)}, function(data,status)
+                {
+                    console.log('Data:' + String(data) + ' status:' + String(status));
+                    if(data['status'] == 200)
+                    {
+                        window.alert('Updated successfully');
+                        view_act('a' + ph);
+                        updateact('a' + ts);
+                    }
+                    else
+                    {
+                        window.alert('An error occured');
+                    }
+                });
+                $.ajax({url:'https://sreeni11.pythonanywhere.com/update',type:'POST',data:{ph:String(ph),hname:String(hname),ts:String(ts),wakeup:String(wakeup),severity:String(severity),duration:String(duration),count:String(count),tmed:String(tmed),mcycle:String(mcycle),phy:String(phy),usc:String(usc),mname:String(mname),pills:String(pills),mhelp:String(mhelp)}, success:function(data,status)
+                {
+                    console.log('Data:' + String(data) + ' status:' + String(status));
+                    if(data['status'] == 200)
+                    {
+                        window.alert('Updated successfully');
+                        view_act('a' + ph);
+                        updateact('a' + ts);
+                    }
+                    else
+                    {
+                        window.alert('An error occured');
+                    }
+                }});*/
+            }
+
+            //req = JSON.stringify(req);
+            console.log(req);
+            $.post('https://sreeni11.pythonanywhere.com/update',req, function(data,status)
+            {
+                console.log('Data:' + String(data) + ' status:' + String(status));
+                if(data['status'] == 200)
+                {
+                    window.alert('Updated successfully');
+                    view_act('a' + ph);
+                    updateact('a' + ts);
+                }
+                else
+                {
+                    window.alert('An error occured');
+                }
+            });
+            /*$.ajax({url:'https://sreeni11.pythonanywhere.com/update',type:'POST',data:req, contentType: "application/x-www-form-urlencoded; charset=UTF-8", success:function(data,status)
+            {
+                console.log('Data:' + String(data) + ' status:' + String(status));
+                if(data['status'] == 200)
+                {
+                    window.alert('Updated successfully');
+                    view_act('a' + ph);
+                    updateact('a' + ts);
+                }
+                else
+                {
+                    window.alert('An error occured');
+                }
+            }});*/
+        }
+
+        function view_act(id)
+        {
+            $.post('https://sreeni11.pythonanywhere.com/activity',{ph:String(id)}, function(data,status)
+            {
+                //resp = JSON.parse(data);
+                resp = data;
+                if(resp.length > 0)
+                {
+                    $('#uap').text(resp[0][0]);
+                    //console.log(resp[0][0]);
+                    $('#uabdy').html('');
+                    $('#ha').attr('hidden','true');
+                    $('#med').attr('hidden','true');
+                    $('#updc').attr('hidden','true');
+                    $('#qbdy').html('');
+                    $('#quest').attr('hidden','true');
+                    for(var i = 0; i < resp.length; ++i)
+                    {
+                        //console.log('i' + resp[i][1]);
+                        var tr = $("<tr></tr>");
+                        var td1 = $("<td></td>").text(resp[i][1]);
+                        var td2 = $("<td></td>").text(resp[i][2]);
+                        if(resp[i][1].includes('Record') || resp[i][1].includes('record'))
+                        {
+                            var td3 = $("<td></td>");
+                            var b1 = $("<button id='v"+resp[i][2]+"' onclick='view(this.id)'>View</button>");
+                            td3.append(b1);
+                            var td4 = $("<td></td>");
+                            var b2 = $("<button id='v"+resp[i][2]+"' onclick='updateact(this.id)'>Update</button>");
+                            td4.append(b2);
+                        }
+                        else
+                        {
+                            var td3 = $("<td>---</td>");
+                            var td4 = $("<td>---</td>")
+                        }
+                        tr.append(td1,td2,td3,td4);
+                        $('#uabdy').append(tr);
+                    }
+                    $('#useract').removeAttr('hidden');
+                }
+                else
+                {
+                    $('#uabdy').html('');
+                    $('#uap').text('No activities for user');
+                    $('#ha').attr('hidden','true');
+                    $('#med').attr('hidden','true');
+                    $('#updc').attr('hidden','true');
+                    $('#quest').attr('hidden','true');
+                    $('#useract').removeAttr('hidden');
+                }
+            });
+        }
+
+        function med()
+        {
+            var tmp = $('#tmed').val();
+            if(tmp == 'Y')
+            {
+                $('#tsc').attr('hidden','true');
+                $('#med').removeAttr('hidden');
+                $('#ts').val('abc');
+            }
+            else
+            {
+                $('#med').attr('hidden','true');
+                $('#tsc').removeAttr('hidden');
+                $('#ts').val('');
+            }
+        }
+
+        function graph()
+        {
+            var ph = $('#usrphn').text();
+            $.post('https://sreeni11.pythonanywhere.com/graph',{ph:String(ph)}, function(data,status)
+            {
+                if(data['status'] == 503)
+                {
+                    window.alert('Error occured');
+                    return null;
+                }
+                console.log(data);
+                if(data['img'] && data['img'].length > 2)
+                {
+                    $('#grp').attr('src',data['img']);
+                }
+                else
+                {
+                    window.alert("No headaches recorded");
+                    $('#grp').attr('src','');
+                }
+            });
+        }
+    </script>
+    <div hidden id='admin'>{{g.user.admin}}</div>
+    <div hidden id='usrphn'>{{g.user.phone}}</div>
+    <div>
+        <h1>{{g.user.fname}}'s Profile</h1>
+    </div>
+    <div>
+        <button onclick='logout()'>Logout</button>
+    </div>
+    <div>
+        <table id = 'usrs' name='usrs' hidden>
+            <thead>
+                <tr>
+                    <th>Phone number</th>
+                    <th>Status</th>
+                    <th>Promote/demote admin</th>
+                    <th>Disable/enable account</th>
+                    <th>View activity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in value %}
+                    <tr>
+                        <td>{{row[0]}}</td>
+                        <td>{{row[1]}}</td>
+                        <td><button id = {{'p'+row[0]}} onclick='promote(this.id)'>Promote/demote</button></td>
+                        <td><button id = {{'d'+row[0]}} onclick='dis(this.id)'>Disable/enable account</button></td>
+                        <td><button id = {{'a'+row[0]}} onclick='view_act(this.id)'>View Activity</button></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div id = 'gcont' hidden>
+        <button onclick='graph()'>Visualise headaches</button>
+        <img id='grp'/>
+    </div>
+    <div id = 'useract' hidden>
+        <h2 id='uap'></h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Activity Name</th>
+                    <th>Timestamp</th>
+                    <th>View</th>
+                    <th>Update</th>
+                </tr>
+            </thead>
+            <tbody id = 'uabdy'>
+
+            </tbody>
+        </table>
+    </div>
+    <div id = 'quest' hidden>
+        <h2 id='qp'></h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Question</th>
+                    <th>Response</th>
+                </tr>
+            </thead>
+            <tbody id = 'qbdy'>
+
+            </tbody>
+        </table>
+    </div>
+    <div id='updc' hidden>
+        <form id='hform'>
+            <div id = 'ha' hidden>
+                <span>Headache Name</span>
+                <input type='text' id='hname' name='hname'>
+                <span>Timestamp</span>
+                <input type='text' id='timestamp' name='timestamp' disabled>
+                <span>Wokeup</span>
+                <select name='wakeup' id='wakeup'>
+                    <option value='Y'>Yes</option>
+                    <option value='N'>No</option>
+                </select>
+                <span>Severity</span>
+                <input type='text' id='severity' name='severity'>
+                <span>Duration</span>
+                <input type='text' id='duration' name='duration'>
+                <span>Count</span>
+                <input type='text' id='count' name='count'>
+                <span>Took Medication</span>
+                <select name='tmed' id='tmed' onchange='med()'>
+                    <option value='Y'>Yes</option>
+                    <option value='N'>No</option>
+                </select>
+                <span>Menstrual Cycle</span>
+                <select name='mcycle' id='mcycle'>
+                    <option value='Y'>Yes</option>
+                    <option value='N'>No</option>
+                    <option value='NULL'>NULL</option>
+                </select>
+                <span>Visited Physician</span>
+                <select name='phy' id='phy'>
+                    <option value='Y'>Yes</option>
+                    <option value='N'>No</option>
+                    <option value='NULL'>NULL</option>
+                </select>
+                <span>USC Fascility</span>
+                <select name='usc' id='usc'>
+                    <option value='Y'>Yes</option>
+                    <option value='N'>No</option>
+                    <option value='NULL'>NULL</option>
+                </select>
+            </div>
+            <div id = 'med' hidden>
+                <span>Medication Name</span>
+                <input type='text' id='mname' name='mname'>
+                <div id = 'tsc'>
+                    <span>Timestamp</span>
+                    <input type='text' id='ts' name='ts' disabled>
+                </div>
+                <span>Number of pills</span>
+                <input type='text' id='pills' name='pills'>
+                <span>Did it help?</span>
+                <select name='mhelp' id='mhelp'>
+                    <option value='Y'>Yes</option>
+                    <option value='N'>No</option>
+                </select>
+            </div>
+        </form>
+        <button onclick='upd()'>Update</button>
+    </div>
+</body>
+</html>
